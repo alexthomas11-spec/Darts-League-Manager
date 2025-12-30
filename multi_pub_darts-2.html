@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cool Hand Cup 2.0</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #0e7490 100%);
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        
+        .container { max-width: 1280px; margin: 0 auto; }
+        
+        .card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .title {
+            font-size: 1.875rem;
+            font-weight: bold;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-green { background: #16a34a; color: white; }
+        .btn-green:hover:not(:disabled) { background: #15803d; }
+        .btn-emerald { background: #059669; color: white; }
+        .btn-emerald:hover { background: #047857; }
+        .btn-indigo { background: #4f46e5; color: white; }
+        .btn-indigo:hover { background: #4338ca; }
+        .btn-purple { background: #9333ea; color: white; }
+        .btn-purple:hover { background: #7e22ce; }
+        .btn-cyan { background: #0891b2; color: white; }
+        .btn-cyan:hover { background: #0e7490; }
+        .btn-orange { background: #ea580c; color: white; }
+        .btn-orange:hover { background: #c2410c; }
+        .btn-red { background: #dc2626; color: white; }
+        .btn-red:hover { background: #b91c1c; }
+        .btn-blue { background: #2563eb; color: white; }
+        .btn-blue:hover { background: #1d4ed8; }
+        .btn-gradient { background: linear-gradient(to right, #2563eb, #06b6d4); color: white; }
+        .btn-gradient:hover { background: linear-gradient(to right, #1d4ed8, #0e7490); }
+        
+        .btn-group { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        
+        .info-box {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+        
+        .info-blue { background: #dbeafe; border: 1px solid #93c5fd; color: #1e40af; }
+        .info-amber { background: #fef3c7; border: 1px solid #fcd34d; color: #78350f; }
+        .info-green { background: #dcfce7; border: 1px solid #86efac; color: #166534; }
+        
+        .input {
+            width: 100%;
+            padding: 0.5rem 1rem;
+            border: 2px solid #93c5fd;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+        
+        .input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        
+        .label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+        
+        .grid { display: grid; gap: 1rem; }
+        .grid-2 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+        
+        .team-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .fixture-card {
+            background: #f9fafb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            border: 2px solid #d1d5db;
+            margin-bottom: 0.75rem;
+        }
+        
+        .fixture-card-blue { background: #dbeafe; border-color: #93c5fd; }
+        .fixture-card-cyan { background: #cffafe; border-color: #67e8f9; }
+        
+        .score-input {
+            width: 4rem;
+            padding: 0.5rem;
+            border: 2px solid #60a5fa;
+            border-radius: 0.25rem;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        
+        .score-input:focus { outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3); }
+        
+        .score-layout {
+            display: grid;
+            grid-template-columns: 3fr 2fr 3fr;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .score-inputs {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .team-name { font-weight: bold; color: #1f2937; }
+        .team-name-right { text-align: right; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.75rem 1rem; text-align: left; }
+        th { background: #f3f4f6; font-weight: 600; color: #374151; font-size: 0.875rem; }
+        td { border-top: 1px solid #e5e7eb; font-size: 0.875rem; }
+        tr:nth-child(even) { background: #f9fafb; }
+        tr:first-child td { background: #dbeafe; }
+        .text-center { text-align: center; }
+        
+        .section-header {
+            background: linear-gradient(to right, #2563eb, #06b6d4);
+            color: white;
+            padding: 0.75rem 1rem;
+            font-size: 1.25rem;
+            font-weight: bold;
+            border-radius: 0.5rem 0.5rem 0 0;
+        }
+        
+        .section-content { padding: 1rem; }
+        
+        .week-selector {
+            background: linear-gradient(to right, #dbeafe, #cffafe);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 2px solid #93c5fd;
+            margin-bottom: 1.5rem;
+        }
+        
+        .week-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        
+        .week-badge {
+            background: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            border: 2px solid #60a5fa;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2563eb;
+        }
+        
+        .day-header {
+            font-size: 1.125rem;
+            font-weight: bold;
+            margin-bottom: 0.75rem;
+        }
+        
+        .day-header-blue { color: #2563eb; }
+        .day-header-cyan { color: #0891b2; }
+        
+        .legend { background: #f9fafb; padding: 0.75rem 1rem; border-top: 1px solid #e5e7eb; font-size: 0.75rem; color: #6b7280; }
+        
+        .space-y { display: flex; flex-direction: column; gap: 0.75rem; }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: auto;
+            padding: 0;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 800px;
+            height: 90vh;
+            max-height: 800px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+            padding: 1.25rem;
+            background: linear-gradient(to right, #2563eb, #06b6d4);
+            color: white;
+            border-radius: 0.5rem 0.5rem 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .close {
+            color: white;
+            font-size: 1.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+        
+        .close:hover { color: #f3f4f6; }
+        
+        .modal-body {
+            height: calc(100% - 80px);
+            overflow: hidden;
+        }
+        
+        .modal-body iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .pub-id-display {
+            background: linear-gradient(to right, #f0fdf4, #dcfce7);
+            border: 2px solid #86efac;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .pub-id-display strong {
+            color: #166534;
+            font-size: 1.125rem;
+        }
+
+        .share-link {
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; }
+        }
+        
+        @media (max-width: 768px) {
+            .score-layout { grid-template-columns: 2fr 2fr 2fr; }
+            .team-name { font-size: 0.875rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <div class="title">
+                    <span>🎯</span>
+                    <span>Cool Hand Cup 2.0</span>
+                </div>
+                <div id="actionButtons"></div>
+            </div>
+
+            <div id="pubIdDisplay" class="pub-id-display" style="display: none;">
+                <strong>🏆 Your Pub ID:</strong> <span id="pubIdValue"></span>
+                <div style="margin-top: 0.5rem; font-size: 0.875rem; color: #166534;">
+                    Share this link with your pub staff:
+                </div>
+                <div class="share-link" id="shareLink"></div>
+                <button onclick="copyShareLink()" class="btn btn-green" style="margin-top: 0.5rem; font-size: 0.875rem;">📋 Copy Link</button>
+            </div>
+
+            <div class="info-box info-blue">
+                <strong>✓ Multi-Pub System:</strong> Each pub has isolated data storage. Your league data is automatically saved and will be available even when offline!
+            </div>
+
+            <div class="info-box info-amber">
+                <strong>📋 League Rules:</strong> 4-week season • Each team plays every other team once • Best of 3 legs (first to 2 wins) • Players must check out on a double • Win = 2pts • No draws • 8+ teams: fixtures split across 2 days (teams play all their weekly games on same day)
+            </div>
+
+            <div id="content"></div>
+        </div>
+    </div>
+
+    <!-- Microsoft Form Modal -->
+    <div id="msFormModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Submit Match Result via Microsoft Form</h2>
+                <button class="close" onclick="closeMSForm()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <iframe id="msFormIframe" src=""></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Error handling
+        window.onerror = function(message, source, lineno, colno, error) {
+            console.error('Error:', message, 'at', source, lineno, colno);
+            return false;
+        };
+        
+        // Microsoft Form URL
+        const MS_FORM_URL = 'https://forms.office.com/Pages/ResponsePage.aspx?id=6d_1v9jFKEmrRAUEw5mslxkLj-pOwwdAjGM2KH7bczRUOFBFNTdVSDhJWUcxTFBVMFNQT1RTNUhDOC4u';
+        
+        // Get pub ID from URL
+        function getPubId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('pub') || urlParams.get('pubid') || null;
+        }
+
+        // Generate storage key for this pub
+        function getStorageKey() {
+            const pubId = getPubId();
+            return pubId ? `dartsLeague_${pubId}` : 'dartsLeagueData';
+        }
+
+        // Copy share link to clipboard
+        function copyShareLink() {
+            const link = document.getElementById('shareLink').textContent;
+            navigator.clipboard.writeText(link).then(() => {
+                alert('Link copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy link. Please copy manually.');
+            });
+        }
+
+        // Display pub ID info
+        function displayPubInfo() {
+            const pubId = getPubId();
+            if (pubId && state.leagueStarted) {
+                const display = document.getElementById('pubIdDisplay');
+                const value = document.getElementById('pubIdValue');
+                const link = document.getElementById('shareLink');
+                
+                display.style.display = 'block';
+                value.textContent = pubId;
+                link.textContent = window.location.href;
+            } else {
+                document.getElementById('pubIdDisplay').style.display = 'none';
+            }
+        }
+        
+        // Open Microsoft Form Modal
+        function openMSForm() {
+            const modal = document.getElementById('msFormModal');
+            const iframe = document.getElementById('msFormIframe');
+            iframe.src = MS_FORM_URL;
+            modal.classList.add('active');
+        }
+        
+        // Close Microsoft Form Modal
+        function closeMSForm() {
+            const modal = document.getElementById('msFormModal');
+            const iframe = document.getElementById('msFormIframe');
+            modal.classList.remove('active');
+            iframe.src = '';
+        }
+        
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('msFormModal');
+            if (event.target == modal) {
+                closeMSForm();
+            }
+        }
+        
+        // State management
+        let state = {
+            teams: [],
+            fixtures: [],
+            results: {},
+            leagueStarted: false,
+            currentWeek: 1,
+            showFixtureList: false,
+            pubName: '',
+            pubCode: '',
+            startDate: '',
+            newTeamName: ''
+        };
+
+        // Load from localStorage with pub-specific key
+        function loadData() {
+            try {
+                const storageKey = getStorageKey();
+                const saved = localStorage.getItem(storageKey);
+                if (saved) {
+                    state = { ...state, ...JSON.parse(saved) };
+                    console.log('Loaded state for:', getPubId() || 'default');
+                }
+            } catch (e) {
+                console.log('No saved data found');
+            }
+            displayPubInfo();
+        }
+
+        // Save to localStorage with pub-specific key
+        function saveData() {
+            try {
+                const storageKey = getStorageKey();
+                localStorage.setItem(storageKey, JSON.stringify(state));
+                console.log('Saved state for:', getPubId() || 'default');
+            } catch (e) {
+                console.error('Error saving data:', e);
+            }
+            displayPubInfo();
+        }
+
+        // Shuffle array function
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        // Generate fixtures - All teams play each other once, with 2-day split for 8+ teams
+        function generateFixtures() {
+            if (state.teams.length < 4) return;
+
+            const teamList = [...state.teams];
+            const numTeams = teamList.length;
+            
+            // Generate ALL possible matches (every team plays every other team)
+            const allMatches = [];
+            let matchId = 0;
+            
+            for (let i = 0; i < numTeams; i++) {
+                for (let j = i + 1; j < numTeams; j++) {
+                    allMatches.push({
+                        id: `match-${matchId++}`,
+                        homeTeam: teamList[i],
+                        awayTeam: teamList[j],
+                        day: null
+                    });
+                }
+            }
+            
+            // Determine if we need 2-day split (8+ teams)
+            const needsTwoDays = numTeams >= 8;
+            
+            // Initialize 4 weeks
+            const weeks = [[], [], [], []];
+            const teamGamesPerWeek = {};
+            
+            // Track how many games each team has in each week
+            for (let team of teamList) {
+                teamGamesPerWeek[team.id] = [0, 0, 0, 0];
+            }
+            
+            // Shuffle matches first for randomness
+            const shuffledMatches = shuffleArray(allMatches);
+            
+            // Distribute matches across weeks, trying to balance each team's schedule
+            for (let match of shuffledMatches) {
+                let bestWeek = 0;
+                let minGames = Infinity;
+                
+                for (let week = 0; week < 4; week++) {
+                    const homeGames = teamGamesPerWeek[match.homeTeam.id][week];
+                    const awayGames = teamGamesPerWeek[match.awayTeam.id][week];
+                    const totalGames = homeGames + awayGames;
+                    
+                    if (totalGames < minGames) {
+                        minGames = totalGames;
+                        bestWeek = week;
+                    }
+                }
+                
+                weeks[bestWeek].push(match);
+                teamGamesPerWeek[match.homeTeam.id][bestWeek]++;
+                teamGamesPerWeek[match.awayTeam.id][bestWeek]++;
+            }
+            
+            // If 8+ teams, assign days ensuring teams play all their games in a week on the same day
+            if (needsTwoDays) {
+                for (let weekIdx = 0; weekIdx < 4; weekIdx++) {
+                    const weekMatches = weeks[weekIdx];
+                    const teamDayAssignment = {};
+                    
+                    const matchesWithPriority = weekMatches.map(match => {
+                        const homeCount = teamGamesPerWeek[match.homeTeam.id][weekIdx];
+                        const awayCount = teamGamesPerWeek[match.awayTeam.id][weekIdx];
+                        return {
+                            match,
+                            priority: Math.max(homeCount, awayCount)
+                        };
+                    }).sort((a, b) => b.priority - a.priority);
+                    
+                    for (let item of matchesWithPriority) {
+                        const match = item.match;
+                        const homeId = match.homeTeam.id;
+                        const awayId = match.awayTeam.id;
+                        
+                        const homeDay = teamDayAssignment[homeId];
+                        const awayDay = teamDayAssignment[awayId];
+                        
+                        if (homeDay && awayDay) {
+                            if (homeDay === awayDay) {
+                                match.day = homeDay;
+                            } else {
+                                match.day = 1;
+                                teamDayAssignment[homeId] = 1;
+                                teamDayAssignment[awayId] = 1;
+                            }
+                        } else if (homeDay) {
+                            match.day = homeDay;
+                            teamDayAssignment[awayId] = homeDay;
+                        } else if (awayDay) {
+                            match.day = awayDay;
+                            teamDayAssignment[homeId] = awayDay;
+                        } else {
+                            const day1Count = weekMatches.filter(m => m.day === 1).length;
+                            const day2Count = weekMatches.filter(m => m.day === 2).length;
+                            const assignedDay = day1Count <= day2Count ? 1 : 2;
+                            
+                            match.day = assignedDay;
+                            teamDayAssignment[homeId] = assignedDay;
+                            teamDayAssignment[awayId] = assignedDay;
+                        }
+                    }
+                }
+                
+                state.teamGroups = { usingTwoDays: true };
+            } else {
+                state.teamGroups = null;
+            }
+            
+            state.fixtures = weeks;
+            saveData();
+        }
+
+        // Add team (works even after league started)
+        function addTeam() {
+            const name = state.newTeamName.trim();
+            if (!name) {
+                alert('Please enter a team name');
+                return;
+            }
+            
+            const id = `team-${Date.now()}`;
+            const newTeam = { id, name };
+            state.teams.push(newTeam);
+            state.newTeamName = '';
+            
+            if (state.leagueStarted) {
+                if (confirm('Adding a new team will create fixtures for them against existing teams. Continue?')) {
+                    addFixturesForNewTeam(newTeam);
+                }
+            }
+            
+            saveData();
+            render();
+        }
+
+        // Add fixtures for a new team without regenerating existing fixtures
+        function addFixturesForNewTeam(newTeam) {
+            const existingTeams = state.teams.filter(t => t.id !== newTeam.id);
+            const needsTwoDays = state.teams.length >= 8;
+            
+            const newMatches = [];
+            let maxMatchId = 0;
+            
+            state.fixtures.forEach(week => {
+                week.forEach(match => {
+                    const matchNum = parseInt(match.id.split('-')[1]);
+                    if (matchNum > maxMatchId) maxMatchId = matchNum;
+                });
+            });
+            
+            existingTeams.forEach(team => {
+                newMatches.push({
+                    id: `match-${++maxMatchId}`,
+                    homeTeam: newTeam,
+                    awayTeam: team,
+                    day: null
+                });
+            });
+            
+            const shuffledNewMatches = shuffleArray(newMatches);
+            const teamGamesPerWeek = {};
+            
+            state.teams.forEach(team => {
+                teamGamesPerWeek[team.id] = [0, 0, 0, 0];
+            });
+            
+            state.fixtures.forEach((week, weekIdx) => {
+                week.forEach(match => {
+                    teamGamesPerWeek[match.homeTeam.id][weekIdx]++;
+                    teamGamesPerWeek[match.awayTeam.id][weekIdx]++;
+                });
+            });
+            
+            for (let match of shuffledNewMatches) {
+                let bestWeek = 0;
+                let minGames = Infinity;
+                
+                for (let week = 0; week < 4; week++) {
+                    const newTeamGames = teamGamesPerWeek[match.homeTeam.id][week];
+                    const existingTeamGames = teamGamesPerWeek[match.awayTeam.id][week];
+                    const totalGames = newTeamGames + existingTeamGames;
+                    
+                    if (totalGames < minGames) {
+                        minGames = totalGames;
+                        bestWeek = week;
+                    }
+                }
+                
+                state.fixtures[bestWeek].push(match);
+                teamGamesPerWeek[match.homeTeam.id][bestWeek]++;
+                teamGamesPerWeek[match.awayTeam.id][bestWeek]++;
+            }
+            
+            if (needsTwoDays) {
+                for (let weekIdx = 0; weekIdx < 4; weekIdx++) {
+                    const weekMatches = state.fixtures[weekIdx];
+                    const teamDayAssignment = {};
+                    
+                    weekMatches.forEach(match => {
+                        if (match.day) {
+                            if (match.homeTeam.id !== newTeam.id) {
+                                teamDayAssignment[match.homeTeam.id] = match.day;
+                            }
+                            if (match.awayTeam.id !== newTeam.id) {
+                                teamDayAssignment[match.awayTeam.id] = match.day;
+                            }
+                        }
+                    });
+                    
+                    weekMatches.forEach(match => {
+                        if (match.homeTeam.id === newTeam.id || match.awayTeam.id === newTeam.id) {
+                            const otherTeamId = match.homeTeam.id === newTeam.id ? match.awayTeam.id : match.homeTeam.id;
+                            const otherTeamDay = teamDayAssignment[otherTeamId];
+                            
+                            if (otherTeamDay) {
+                                match.day = otherTeamDay;
+                                teamDayAssignment[newTeam.id] = otherTeamDay;
+                            } else {
+                                const day1Count = weekMatches.filter(m => m.day === 1).length;
+                                const day2Count = weekMatches.filter(m => m.day === 2).length;
+                                const assignedDay = day1Count <= day2Count ? 1 : 2;
+                                match.day = assignedDay;
+                                teamDayAssignment[newTeam.id] = assignedDay;
+                                teamDayAssignment[otherTeamId] = assignedDay;
+                            }
+                        }
+                    });
+                }
+                
+                state.teamGroups = { usingTwoDays: true };
+            }
+            
+            saveData();
+        }
+
+        // Remove team
+        function removeTeam(teamId) {
+            if (confirm('Are you sure you want to remove this team?')) {
+                state.teams = state.teams.filter(t => t.id !== teamId);
+                
+                if (state.leagueStarted) {
+                    if (confirm('Removing a team will delete their fixtures. Continue?')) {
+                        state.fixtures = state.fixtures.map(week => 
+                            week.filter(match => 
+                                match.homeTeam.id !== teamId && match.awayTeam.id !== teamId
+                            )
+                        );
+                        
+                        const newResults = {};
+                        Object.entries(state.results).forEach(([key, result]) => {
+                            const match = key.match(/week-(\d+)-(.+)/);
+                            if (match) {
+                                const weekNum = parseInt(match[1]);
+                                const matchId = match[2];
+                                const weekFixtures = state.fixtures[weekNum - 1] || [];
+                                const fixture = weekFixtures.find(f => f.id === matchId);
+                                
+                                if (fixture) {
+                                    newResults[key] = result;
+                                }
+                            }
+                        });
+                        state.results = newResults;
+                        
+                        if (state.teams.length < 8) {
+                            state.teamGroups = null;
+                            state.fixtures.forEach(week => {
+                                week.forEach(match => {
+                                    match.day = null;
+                                });
+                            });
+                        }
+                    }
+                }
+                
+                saveData();
+                render();
+            }
+        }
+
+        // Start league
+        function startLeague() {
+            if (state.teams.length < 4) {
+                alert('You need at least 4 teams to start the league!');
+                return;
+            }
+            state.leagueStarted = true;
+            state.currentWeek = 1;
+            generateFixtures();
+            render();
+        }
+
+        // Change week
+        function changeWeek(direction) {
+            const newWeek = state.currentWeek + direction;
+            if (newWeek >= 1 && newWeek <= 4) {
+                state.currentWeek = newWeek;
+                saveData();
+                render();
+            }
+        }
+
+        // Update result
+        function updateResult(week, matchId, homeScore, awayScore) {
+            const home = homeScore === '' || homeScore === null || homeScore === undefined ? null : parseInt(homeScore);
+            const away = awayScore === '' || awayScore === null || awayScore === undefined ? null : parseInt(awayScore);
+            
+            const key = `week-${week}-${matchId}`;
+            state.results[key] = {
+                homeScore: home,
+                awayScore: away
+            };
+            
+            saveData();
+            render();
+        }
+
+        // Calculate league table
+        function calculateLeagueTable() {
+            const table = state.teams.map(team => ({
+                id: team.id,
+                name: team.name,
+                played: 0,
+                won: 0,
+                lost: 0,
+                legsFor: 0,
+                legsAgainst: 0,
+                legDiff: 0,
+                points: 0
+            }));
+
+            Object.entries(state.results).forEach(([key, result]) => {
+                if (result.homeScore === null || result.awayScore === null) return;
+                
+                const [, weekStr, matchId] = key.match(/week-(\d+)-(.+)/);
+                const week = parseInt(weekStr);
+                
+                if (week > state.currentWeek) return;
+                
+                const match = state.fixtures[week - 1]?.find(m => m.id === matchId);
+                if (!match) return;
+
+                const homeTeam = table.find(t => t.id === match.homeTeam.id);
+                const awayTeam = table.find(t => t.id === match.awayTeam.id);
+
+                if (homeTeam && awayTeam) {
+                    homeTeam.played++;
+                    awayTeam.played++;
+                    
+                    homeTeam.legsFor += result.homeScore;
+                    homeTeam.legsAgainst += result.awayScore;
+                    awayTeam.legsFor += result.awayScore;
+                    awayTeam.legsAgainst += result.homeScore;
+
+                    if (result.homeScore > result.awayScore) {
+                        homeTeam.won++;
+                        homeTeam.points += 2;
+                        awayTeam.lost++;
+                    } else if (result.awayScore > result.homeScore) {
+                        awayTeam.won++;
+                        awayTeam.points += 2;
+                        homeTeam.lost++;
+                    }
+                }
+            });
+
+            table.forEach(team => {
+                team.legDiff = team.legsFor - team.legsAgainst;
+            });
+
+            return table.sort((a, b) => {
+                if (b.points !== a.points) return b.points - a.points;
+                if (b.legDiff !== a.legDiff) return b.legDiff - a.legDiff;
+                return b.legsFor - a.legsFor;
+            });
+        }
+
+        // Export to Excel
+        function exportToExcel() {
+            if (typeof XLSX === 'undefined') {
+                alert('Excel export library not loaded. Please check your internet connection.');
+                return;
+            }
+            
+            const leagueTable = calculateLeagueTable();
+            
+            const wb = XLSX.utils.book_new();
+            
+            const infoData = [
+                ['Cool Hand Cup 2.0'],
+                ['Pub:', state.pubName || 'Not set'],
+                ['Pub Code:', state.pubCode || 'Not set'],
+                ['Pub ID:', getPubId() || 'Not set'],
+                ['Start Date:', state.startDate || 'Not set'],
+                ['Current Week:', state.currentWeek],
+                []
+            ];
+            
+            const tableData = [
+                ['Position', 'Team', 'Played', 'Won', 'Lost', 'Legs For', 'Legs Against', 'Leg Diff', 'Points']
+            ];
+            leagueTable.forEach((team, i) => {
+                tableData.push([
+                    i + 1,
+                    team.name,
+                    team.played,
+                    team.won,
+                    team.lost,
+                    team.legsFor,
+                    team.legsAgainst,
+                    team.legDiff,
+                    team.points
+                ]);
+            });
+            
+            const combinedData = [...infoData, ...tableData];
+            const ws1 = XLSX.utils.aoa_to_sheet(combinedData);
+            XLSX.utils.book_append_sheet(wb, ws1, 'League Table');
+            
+            const fixturesData = [['Week', 'Home Team', 'Score', 'Away Team']];
+            state.fixtures.forEach((week, idx) => {
+                week.forEach(match => {
+                    const key = `week-${idx + 1}-${match.id}`;
+                    const result = state.results[key];
+                    const score = result && result.homeScore !== null && result.awayScore !== null
+                        ? `${result.homeScore} - ${result.awayScore}`
+                        : 'vs';
+                    
+                    fixturesData.push([
+                        idx + 1,
+                        match.homeTeam.name,
+                        score,
+                        match.awayTeam.name
+                    ]);
+                });
+            });
+            
+            const ws2 = XLSX.utils.aoa_to_sheet(fixturesData);
+            XLSX.utils.book_append_sheet(wb, ws2, 'Fixtures');
+            
+            const pubId = getPubId();
+            const pubCodePart = state.pubCode ? `${state.pubCode}-` : (pubId ? `${pubId}-` : '');
+            XLSX.writeFile(wb, `${pubCodePart}cool-hand-cup-week${state.currentWeek}.xlsx`);
+        }
+
+        // Export league data as JSON
+        function exportLeagueData() {
+            const dataStr = JSON.stringify(state, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            const pubId = getPubId();
+            const pubCodePart = state.pubCode ? `${state.pubCode}-` : (pubId ? `${pubId}-` : '');
+            link.download = `${pubCodePart}league-data.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Import league data from JSON file
+        function importLeagueData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const importedData = JSON.parse(event.target.result);
+                        
+                        if (!importedData.teams || !Array.isArray(importedData.teams)) {
+                            alert('Invalid league data file!');
+                            return;
+                        }
+                        
+                        if (confirm('This will replace all current data. Are you sure you want to import?')) {
+                            state = { ...state, ...importedData };
+                            saveData();
+                            render();
+                            alert('League data imported successfully!');
+                        }
+                    } catch (error) {
+                        alert('Error reading file. Please make sure it\'s a valid league data file.');
+                        console.error('Import error:', error);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // Print page
+        function printPage() {
+            window.print();
+        }
+
+        // Reset league
+        function resetLeague() {
+            if (confirm('Are you sure? This will delete all teams, fixtures, and results!')) {
+                const storageKey = getStorageKey();
+                localStorage.removeItem(storageKey);
+                state = {
+                    teams: [],
+                    fixtures: [],
+                    results: {},
+                    leagueStarted: false,
+                    currentWeek: 1,
+                    showFixtureList: false,
+                    pubName: '',
+                    pubCode: '',
+                    startDate: '',
+                    newTeamName: ''
+                };
+                render();
+            }
+        }
+
+        // Return to setup page without resetting data
+        function returnToSetup() {
+            if (confirm('Return to setup page? Your league data will be preserved.')) {
+                state.leagueStarted = false;
+                saveData();
+                render();
+            }
+        }
+
+        // Toggle fixture list
+        function toggleFixtureList() {
+            state.showFixtureList = !state.showFixtureList;
+            saveData();
+            render();
+        }
+
+        // Render function
+        function render() {
+            const content = document.getElementById('content');
+            const actionButtons = document.getElementById('actionButtons');
+            
+            if (state.leagueStarted) {
+                actionButtons.innerHTML = `
+                    <div class="btn-group">
+                        <button onclick="openMSForm()" class="btn btn-green no-print">📝 Submit Result (Form)</button>
+                        <button onclick="exportToExcel()" class="btn btn-emerald no-print">📊 Export to Excel</button>
+                        <button onclick="exportLeagueData()" class="btn btn-indigo no-print">💾 Export Data</button>
+                        <button onclick="printPage()" class="btn btn-purple no-print">🖨️ Print</button>
+                        <button onclick="toggleFixtureList()" class="btn btn-cyan no-print">${state.showFixtureList ? '📅 Hide' : '📅 Show'} All Fixtures</button>
+                        <button onclick="returnToSetup()" class="btn btn-orange no-print">⬅️ Back to Setup</button>
+                        <button onclick="resetLeague()" class="btn btn-red no-print">🔄 Reset League</button>
+                    </div>
+                `;
+            } else {
+                actionButtons.innerHTML = `
+                    <div class="btn-group">
+                        <button onclick="importLeagueData()" class="btn btn-indigo no-print">📥 Import Data</button>
+                        <button onclick="resetLeague()" class="btn btn-red no-print">🔄 Reset</button>
+                    </div>
+                `;
+            }
+
+            if (!state.leagueStarted) {
+                const pubId = getPubId();
+                const pubInfoHtml = pubId ? `
+                    <div class="info-box info-green" style="margin-bottom: 1rem;">
+                        <strong>✓ Pub ID Active:</strong> ${pubId} - This pub's data is isolated from all other pubs.
+                    </div>
+                ` : `
+                    <div class="info-box info-amber" style="margin-bottom: 1rem;">
+                        <strong>⚠️ No Pub ID:</strong> You're using the default storage. To create a unique pub instance, add <code>?pub=YOUR_PUB_NAME</code> to the URL (e.g., <code>?pub=redlion</code>)
+                    </div>
+                `;
+
+                let html = `
+                    <div style="max-width: 800px; margin: 0 auto;">
+                        ${pubInfoHtml}
+                        <div style="background: linear-gradient(to right, #dbeafe, #cffafe); padding: 1.5rem; border-radius: 0.5rem; border: 2px solid #93c5fd;">
+                            <h2 style="font-size: 1.5rem; font-weight: bold; color: #1f2937; margin-bottom: 1rem;">League Setup</h2>
+                            
+                            <div class="grid grid-2" style="margin-bottom: 1rem;">
+                                <div>
+                                    <label class="label">Pub Name</label>
+                                    <input type="text" value="${state.pubName}" 
+                                        oninput="state.pubName = this.value; saveData()"
+                                        class="input">
+                                </div>
+                                <div>
+                                    <label class="label">Pub Code</label>
+                                    <input type="text" value="${state.pubCode}" 
+                                        oninput="state.pubCode = this.value; saveData()"
+                                        class="input">
+                                </div>
+                                <div>
+                                    <label class="label">Start Date</label>
+                                    <input type="date" value="${state.startDate}" 
+                                        onchange="state.startDate = this.value; saveData()"
+                                        class="input">
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom: 1rem;">
+                                <label class="label">Add Team</label>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <input type="text" value="${state.newTeamName}" 
+                                        oninput="state.newTeamName = this.value"
+                                        onkeypress="if(event.key === 'Enter') addTeam()"
+                                        placeholder="Enter team name"
+                                        class="input">
+                                    <button onclick="addTeam()" class="btn btn-blue">Add Team</button>
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom: 1rem;">
+                                <h3 style="font-size: 1.125rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem;">Teams (${state.teams.length})</h3>
+                                ${state.teams.length === 0 ? 
+                                    '<p style="color: #6b7280; font-style: italic;">No teams added yet. Add at least 4 teams to start.</p>' :
+                                    `<div class="grid grid-2">
+                                        ${state.teams.map(team => `
+                                            <div class="team-item">
+                                                <span style="font-weight: 600; color: #1f2937;">${team.name}</span>
+                                                <button onclick="removeTeam('${team.id}')" 
+                                                    style="color: #dc2626; font-weight: bold; background: none; border: none; cursor: pointer; font-size: 1.25rem;">✕</button>
+                                            </div>
+                                        `).join('')}
+                                    </div>`
+                                }
+                            </div>
+
+                            <button onclick="startLeague()" 
+                                ${state.teams.length < 4 ? 'disabled' : ''}
+                                class="btn btn-gradient" style="width: 100%; padding: 1rem; font-size: 1.125rem;">
+                                ${state.teams.length < 4 ? `Need ${4 - state.teams.length} more team(s) to start` : '🎯 Start League'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+                content.innerHTML = html;
+            } else {
+                const currentMatches = state.fixtures[state.currentWeek - 1] || [];
+                const leagueTable = calculateLeagueTable();
+                const hasTwoDays = currentMatches.some(m => m.day !== null && m.day !== undefined);
+                
+                let html = `
+                    <div class="week-selector">
+                        <div class="week-controls">
+                            <div style="text-align: center;">
+                                <h2 style="font-size: 1.5rem; font-weight: bold; color: #1f2937;">${state.pubName || 'Cool Hand Cup 2.0'}</h2>
+                                <p style="color: #374151;">
+                                    ${state.pubCode ? `Pub Code: ${state.pubCode}` : ''} 
+                                    ${state.startDate ? `• Started: ${new Date(state.startDate).toLocaleDateString()}` : ''}
+                                </p>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <button onclick="changeWeek(-1)" ${state.currentWeek === 1 ? 'disabled' : ''} class="btn btn-blue">← Previous</button>
+                                <div class="week-badge">Week ${state.currentWeek}</div>
+                                <button onclick="changeWeek(1)" ${state.currentWeek === 4 ? 'disabled' : ''} class="btn btn-blue">Next →</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Fixtures
+                if (hasTwoDays) {
+                    const day1Matches = currentMatches.filter(m => m.day === 1);
+                    const day2Matches = currentMatches.filter(m => m.day === 2);
+                    
+                    html += '<div style="background: white; border-radius: 0.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 1.5rem;">';
+                    html += '<div class="section-header">Week ' + state.currentWeek + ' Fixtures - Split Across 2 Days</div>';
+                    
+                    if (day1Matches.length > 0) {
+                        html += '<div style="padding: 1rem; border-bottom: 2px solid #e5e7eb;">';
+                        html += '<h4 class="day-header day-header-blue">📅 Day 1</h4>';
+                        html += '<div class="space-y">';
+                        day1Matches.forEach(match => {
+                            const key = `week-${state.currentWeek}-${match.id}`;
+                            const result = state.results[key] || { homeScore: null, awayScore: null };
+                            const homeVal = result.homeScore !== null ? result.homeScore : '';
+                            const awayVal = result.awayScore !== null ? result.awayScore : '';
+                            
+                            html += `
+                                <div class="fixture-card fixture-card-blue">
+                                    <div class="score-layout">
+                                        <div class="team-name team-name-right">${match.homeTeam.name}</div>
+                                        <div class="score-inputs">
+                                            <input type="number" min="0" max="2" value="${homeVal}" placeholder="0"
+                                                id="home-${match.id}"
+                                                oninput="updateResult(${state.currentWeek}, '${match.id}', this.value, document.getElementById('away-${match.id}').value)"
+                                                class="score-input">
+                                            <span style="font-weight: bold; font-size: 1.25rem; color: #6b7280;">-</span>
+                                            <input type="number" min="0" max="2" value="${awayVal}" placeholder="0"
+                                                id="away-${match.id}"
+                                                oninput="updateResult(${state.currentWeek}, '${match.id}', document.getElementById('home-${match.id}').value, this.value)"
+                                                class="score-input">
+                                        </div>
+                                        <div class="team-name">${match.awayTeam.name}</div>
+                                    </div>
+                                    <div style="margin-top: 0.5rem; text-align: center; font-size: 0.75rem; color: #2563eb; font-weight: 600;">
+                                        Best of 3: First to 2 wins (2-0, 2-1, 1-2, 0-2)
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        html += '</div></div>';
+                    }
+                    
+                    if (day2Matches.length > 0) {
+                        html += '<div style="padding: 1rem;">';
+                        html += '<h4 class="day-header day-header-cyan">📅 Day 2</h4>';
+                        html += '<div class="space-y">';
+                        day2Matches.forEach(match => {
+                            const key = `week-${state.currentWeek}-${match.id}`;
+                            const result = state.results[key] || { homeScore: null, awayScore: null };
+                            const homeVal = result.homeScore !== null ? result.homeScore : '';
+                            const awayVal = result.awayScore !== null ? result.awayScore : '';
+                            
+                            html += `
+                                <div class="fixture-card fixture-card-cyan">
+                                    <div class="score-layout">
+                                        <div class="team-name team-name-right">${match.homeTeam.name}</div>
+                                        <div class="score-inputs">
+                                            <input type="number" min="0" max="2" value="${homeVal}" placeholder="0"
+                                                id="home-${match.id}"
+                                                oninput="updateResult(${state.currentWeek}, '${match.id}', this.value, document.getElementById('away-${match.id}').value)"
+                                                class="score-input">
+                                            <span style="font-weight: bold; font-size: 1.25rem; color: #6b7280;">-</span>
+                                            <input type="number" min="0" max="2" value="${awayVal}" placeholder="0"
+                                                id="away-${match.id}"
+                                                oninput="updateResult(${state.currentWeek}, '${match.id}', document.getElementById('home-${match.id}').value, this.value)"
+                                                class="score-input">
+                                        </div>
+                                        <div class="team-name">${match.awayTeam.name}</div>
+                                    </div>
+                                    <div style="margin-top: 0.5rem; text-align: center; font-size: 0.75rem; color: #0891b2; font-weight: 600;">
+                                        Best of 3: First to 2 wins (2-0, 2-1, 1-2, 0-2)
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        html += '</div></div>';
+                    }
+                    
+                    html += '</div>';
+                } else {
+                    html += '<div style="background: white; border-radius: 0.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 1.5rem;">';
+                    html += '<div class="section-header">Week ' + state.currentWeek + ' Fixtures</div>';
+                    html += '<div class="section-content space-y">';
+                    currentMatches.forEach(match => {
+                        const key = `week-${state.currentWeek}-${match.id}`;
+                        const result = state.results[key] || { homeScore: null, awayScore: null };
+                        const homeVal = result.homeScore !== null ? result.homeScore : '';
+                        const awayVal = result.awayScore !== null ? result.awayScore : '';
+                        
+                        html += `
+                            <div class="fixture-card">
+                                <div class="score-layout">
+                                    <div class="team-name team-name-right">${match.homeTeam.name}</div>
+                                    <div class="score-inputs">
+                                        <input type="number" min="0" max="2" value="${homeVal}" placeholder="0"
+                                            id="home-${match.id}"
+                                            oninput="updateResult(${state.currentWeek}, '${match.id}', this.value, document.getElementById('away-${match.id}').value)"
+                                            class="score-input">
+                                        <span style="font-weight: bold; font-size: 1.25rem; color: #6b7280;">-</span>
+                                        <input type="number" min="0" max="2" value="${awayVal}" placeholder="0"
+                                            id="away-${match.id}"
+                                            oninput="updateResult(${state.currentWeek}, '${match.id}', document.getElementById('home-${match.id}').value, this.value)"
+                                            class="score-input">
+                                    </div>
+                                    <div class="team-name">${match.awayTeam.name}</div>
+                                </div>
+                                <div style="margin-top: 0.5rem; text-align: center; font-size: 0.75rem; color: #2563eb; font-weight: 600;">
+                                    Best of 3: First to 2 wins (2-0, 2-1, 1-2, 0-2)
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div></div>';
+                }
+
+                // All fixtures (if shown)
+                if (state.showFixtureList) {
+                    html += '<div class="no-print" style="background: white; border-radius: 0.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 1.5rem; max-height: 400px; overflow-y: auto;">';
+                    html += '<div class="section-header">All Fixtures</div>';
+                    html += '<div class="section-content">';
+                    state.fixtures.forEach((week, idx) => {
+                        html += `<div style="margin-bottom: 1rem;"><h4 style="font-weight: bold; color: #374151; margin-bottom: 0.5rem;">Week ${idx + 1}</h4>`;
+                        week.forEach(match => {
+                            const key = `week-${idx + 1}-${match.id}`;
+                            const result = state.results[key];
+                            const score = result && result.homeScore !== null && result.awayScore !== null 
+                                ? `${result.homeScore} - ${result.awayScore}`
+                                : 'vs';
+                            const dayLabel = match.day ? ` (Day ${match.day})` : '';
+                            html += `<div style="padding: 0.5rem; background: #f9fafb; border-radius: 0.25rem; margin-bottom: 0.25rem; font-size: 0.875rem;">
+                                <span style="font-weight: 600;">${match.homeTeam.name}</span>
+                                <span style="margin: 0 0.5rem; color: #6b7280;">${score}</span>
+                                <span style="font-weight: 600;">${match.awayTeam.name}</span>
+                                <span style="color: #6b7280;">${dayLabel}</span>
+                            </div>`;
+                        });
+                        html += '</div>';
+                    });
+                    html += '</div></div>';
+                }
+
+                // League table
+                html += '<div style="background: white; border-radius: 0.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">';
+                html += '<div class="section-header">League Table</div>';
+                html += '<div style="overflow-x: auto;"><table><thead><tr>';
+                html += '<th>Pos</th><th>Team</th><th class="text-center">P</th><th class="text-center">W</th><th class="text-center">L</th>';
+                html += '<th class="text-center">LF</th><th class="text-center">LA</th><th class="text-center">+/-</th><th class="text-center">Pts</th>';
+                html += '</tr></thead><tbody>';
+                leagueTable.forEach((team, i) => {
+                    const diffColor = team.legDiff > 0 ? '#16a34a' : team.legDiff < 0 ? '#dc2626' : '#6b7280';
+                    html += `<tr>
+                        <td style="font-weight: bold;">${i + 1}</td>
+                        <td style="font-weight: 600;">${team.name}</td>
+                        <td class="text-center">${team.played}</td>
+                        <td class="text-center" style="color: #16a34a; font-weight: 600;">${team.won}</td>
+                        <td class="text-center" style="color: #dc2626; font-weight: 600;">${team.lost}</td>
+                        <td class="text-center">${team.legsFor}</td>
+                        <td class="text-center">${team.legsAgainst}</td>
+                        <td class="text-center" style="color: ${diffColor}; font-weight: 600;">${team.legDiff > 0 ? '+' : ''}${team.legDiff}</td>
+                        <td class="text-center" style="font-weight: bold; color: #2563eb; font-size: 1.125rem;">${team.points}</td>
+                    </tr>`;
+                });
+                html += '</tbody></table></div>';
+                html += '<div class="legend"><strong>Legend:</strong> P = Played, W = Won, L = Lost, LF = Legs For, LA = Legs Against, +/- = Leg Difference<br>';
+                html += '<strong>Scoring:</strong> Win = 2pts • Best of 3 legs (first to 2 wins) • No draws<br>';
+                html += '<strong>Format:</strong> 4-week season • Each team plays every other team once</div>';
+                html += '</div>';
+
+                content.innerHTML = html;
+            }
+        }
+
+        // Initialize
+        try {
+            loadData();
+            render();
+        } catch (error) {
+            console.error('Initialization error:', error);
+            document.getElementById('content').innerHTML = '<div style="padding: 2rem; text-align: center; color: #dc2626;"><h2>Error Loading Application</h2><p>Please refresh the page and try again.</p><p style="font-size: 0.875rem; color: #6b7280;">Error: ' + error.message + '</p></div>';
+        }
+    </script>
+</body>
+</html>
